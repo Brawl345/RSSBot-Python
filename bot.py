@@ -253,6 +253,16 @@ def get_new_entries(last, nentries):
         entries.append(v)
     return entries
 
+def manually_check_rss(bot, update):
+    if not can_use(update):
+      return
+    check_rss(bot, '')
+    bot.sendMessage(
+                    chat_id=update.message.chat_id,
+                    text = 'Ausgeführt.',
+                    reply_to_message_id=update.message.message_id
+                   )
+
 @run_async
 def check_rss(bot, job):
     keys = list(r.keys('pythonbot:rss:*:subs'))
@@ -307,7 +317,8 @@ def check_rss(bot, job):
             r.srem(v, receiver)
             r.sadd(v, e.new_chat_id)
             r.rename('pythonbot:rss:' + receiver, 'pythonbot:rss:' + str(e.new_chat_id))
-            bot.sendMessage(e.new_chat_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)             
+            bot.sendMessage(e.new_chat_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)            
+    print('----------')
 
 def error(bot, update, error):
     logger.warn('Update "%s" verursachte Fehler "%s"' % (update, error))
@@ -333,6 +344,7 @@ def main():
     dp.add_handler(CommandHandler("rss", list_rss, pass_args=True))
     dp.add_handler(CommandHandler("sub", subscribe_to_rss, pass_args=True))
     dp.add_handler(CommandHandler("del", unsubscribe_rss, pass_args=True))
+    dp.add_handler(CommandHandler("sync", manually_check_rss))
 
     # log all errors
     dp.add_error_handler(error)
