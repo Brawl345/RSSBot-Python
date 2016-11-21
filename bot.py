@@ -281,6 +281,7 @@ def check_rss(bot, job):
       newentr = get_new_entries(last, feed_data.entries)
       text = ''
       for k2, v2 in enumerate(newentr):
+        print(newentr)
         if not 'title' in v2:
           title = 'Kein Titel'
         else:
@@ -291,7 +292,12 @@ def check_rss(bot, job):
         else:
           link = v2.link
           link_name = urlparse(link).netloc
-        if 'summary' in v2:
+        if 'content' in v2:
+            content = cleanRSS(v2.content[0].value)
+            content = remove_tags(content).lstrip()
+            if len(content) > 250:
+              content = content[0:250] + '...'
+        elif 'summary' in v2:
             content = cleanRSS(v2.summary)
             content = remove_tags(content).lstrip()
             if len(content) > 250:
