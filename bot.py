@@ -282,8 +282,8 @@ def check_rss(bot, job):
           link = v2.link
           link_name = urlparse(link).netloc
         if 'summary' in v2:
-            content = cleanRSS(content)
-            content = remove_tags(v2.summary).lstrip()
+            content = cleanRSS(v2.summary)
+            content = remove_tags(content).lstrip()
             if len(content) > 250:
               content = content[0:250] + '...'
         else:
