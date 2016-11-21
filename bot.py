@@ -291,7 +291,7 @@ def check_rss(bot, job):
         # Für 1 Nachricht pro Beitrag, tue dies:
         # Entferne hier das "text + "...
         text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
-      # ...und setze hier vor jeder Zweile 2 zusätzliche Leerzeichen
+      # ...und setze hier vor jeder Zeile 2 zusätzliche Leerzeichen
       if text != '':
         newlast = newentr[0].id
         r.set('pythonbot:rss:' + url + ':last_entry', newlast)
