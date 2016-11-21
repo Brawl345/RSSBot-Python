@@ -60,7 +60,38 @@ def can_use(update):
       return True
     else:
       return False
- 
+
+def cleanRSS(str):
+  str = str.replace('[…]', '')
+  str = str.replace('[bilder]', '')
+  str = str.replace('[mehr]', '')
+  str = str.replace('[video]', '')
+  str = str.replace('...[more]', '')
+  str = str.replace('[more]', '')
+  str = str.replace('[liveticker]', '')
+  str = str.replace('[livestream]', '')
+  str = str.replace('[multimedia]', '')
+  str = str.replace('[phoenix]', '')
+  str = str.replace('[swr]', '')
+  str = str.replace('[ndr]', '')
+  str = str.replace('[mdr]', '')
+  str = str.replace('[rbb]', '')
+  str = str.replace('[wdr]', '')
+  str = str.replace('[hr]', '')
+  str = str.replace('[br]', '')
+  str = str.replace('Click for full.', '')
+  str = str.replace('Read more »', '')
+  str = str.replace('Read more', '')
+  str = str.replace('(more…)', '')
+  str = str.replace('View On WordPress', '')
+  str = str.replace('(RSS generated with  FetchRss)', '')
+  str = str.replace('-- Delivered by Feed43 service', '')
+  str = str.replace('Meldung bei www.tagesschau.de lesen', '')
+  str = str.replace('The post.*appeared first on Sugoi! Anime Blog.', '')
+  str = str.replace('Der Beitrag.*erschien zuerst auf MAnime.de.', '')
+  str = re.sub('http://www\.serienjunkies.de/.*\.html', '', str)
+  return str
+      
 def check_chat(bot, username):
     try:
         return bot.getChat(username)
@@ -251,6 +282,7 @@ def check_rss(bot, job):
           link = v2.link
           link_name = urlparse(link).netloc
         if 'summary' in v2:
+            content = cleanRSS(content)
             content = remove_tags(v2.summary).lstrip()
             if len(content) > 250:
               content = content[0:250] + '...'
@@ -258,7 +290,7 @@ def check_rss(bot, job):
             content = ''
         # Für 1 Nachricht pro Beitrag, tue dies:
         # Entferne hier das "text + "...
-        text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + remove_tags(content).lstrip() + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
+        text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
       # ...und setze hier vor jeder Zweile 2 zusätzliche Leerzeichen
       if text != '':
         newlast = newentr[0].id
