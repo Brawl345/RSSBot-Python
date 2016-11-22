@@ -91,6 +91,7 @@ def cleanRSS(str):
   str = str.replace('The post.*appeared first on Sugoi! Anime Blog.', '')
   str = str.replace('Der Beitrag.*erschien zuerst auf MAnime.de.', '')
   str = re.sub('http://www\.serienjunkies.de/.*\.html', '', str)
+  str = str.replace('\n', '')
   return str
       
 def check_chat(bot, username):
