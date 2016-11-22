@@ -281,7 +281,6 @@ def check_rss(bot, job):
       newentr = get_new_entries(last, feed_data.entries)
       text = ''
       for k2, v2 in enumerate(newentr):
-        print(newentr)
         if not 'title' in v2:
           title = 'Kein Titel'
         else:
@@ -291,7 +290,12 @@ def check_rss(bot, job):
           link_name = link
         else:
           link = v2.link
-          link_name = urlparse(link).netloc
+          f = re.search('^https?://feedproxy\.google\.com/~r/(.+?)/.*', link) # feedproxy.google.com
+          if f:
+            link_name = f.group(1)
+          else:
+            link_name = urlparse(link).netloc
+        link_name = re.sub('^www\d?\.', '', link_name) # www.
         if 'content' in v2:
             content = cleanRSS(v2.content[0].value)
             content = remove_tags(content).lstrip()
