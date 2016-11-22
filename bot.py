@@ -84,6 +84,7 @@ def cleanRSS(str):
   str = str.replace('Read more', '')
   str = str.replace('(more…)', '')
   str = str.replace('View On WordPress', '')
+  str = str.replace('Continue reading →', '')
   str = str.replace('(RSS generated with  FetchRss)', '')
   str = str.replace('-- Delivered by Feed43 service', '')
   str = str.replace('Meldung bei www.tagesschau.de lesen', '')
@@ -284,7 +285,7 @@ def check_rss(bot, job):
         if not 'title' in v2:
           title = 'Kein Titel'
         else:
-          title = v2.title
+          title = remove_tags(v2.title).lstrip()
         if not 'link' in v2:
           link = feed_data.feed.link
           link_name = link
@@ -297,13 +298,13 @@ def check_rss(bot, job):
             link_name = urlparse(link).netloc
         link_name = re.sub('^www\d?\.', '', link_name) # www.
         if 'content' in v2:
-            content = cleanRSS(v2.content[0].value)
-            content = remove_tags(content).lstrip()
+            content = remove_tags(v2.content[0].value).lstrip()
+            content = cleanRSS(content)
             if len(content) > 250:
               content = content[0:250] + '...'
         elif 'summary' in v2:
-            content = cleanRSS(v2.summary)
-            content = remove_tags(content).lstrip()
+            content = remove_tags(v2.summary).lstrip()
+            content = cleanRSS(content)
             if len(content) > 250:
               content = content[0:250] + '...'
         else:
