@@ -7,6 +7,7 @@
 import re
 import redis
 import feedparser
+from json import loads
 
 from configparser import ConfigParser
 from telegram import ChatAction, ParseMode
@@ -34,6 +35,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+# Admins
+admins = loads(config["ADMIN"]["id"])
+if not admins:
+    print('Keine Admin-IDs gesetzt, bitte Konfigurationsdatei bearbeiten.')
+    quit()
+
 # Utils
 if redis_socket:
     r = redis.Redis(unix_socket_path=redis_socket, db=int(redis_db), decode_responses=True)
@@ -55,8 +62,7 @@ def remove_tags(html):
     return ''.join(BeautifulSoup(html,  "html.parser").findAll(text=True))
     
 def can_use(update):
-    unlocked = [36623702]
-    if update.message.from_user.id in unlocked:
+    if update.message.from_user.id in admins:
       return True
     else:
       return False
@@ -158,10 +164,16 @@ def subscribe_to_rss(bot, update, args):
       feed_title = 'Unbekannten Feed'
     else:
       feed_title = feed_data.feed.title
-    last_entry = feed_data.entries[0].id
-    lhash = 'pythonbot:rss:' + feed_url + ':last_entry'
-    if not r.exists(lhash):
-      r.set(lhash, last_entry)
+    
+    if len(feed_data.entries) > 0:
+        if not 'id' in feed_data.entries[0]:
+            last_entry = feed_data.entries[0].link
+        else:
+            last_entry = feed_data.entries[0].id
+        lhash = 'pythonbot:rss:' + feed_url + ':last_entry'
+        if not r.exists(lhash):
+             r.set(lhash, last_entry)
+
     r.sadd('pythonbot:rss:' + feed_url + ':subs', int(chat_id))
     r.sadd('pythonbot:rss:' + chat_id, feed_url)
     bot.sendMessage(
@@ -225,6 +237,8 @@ def get_rss_list(chat_id, chat_name):
 
 @run_async    
 def list_rss(bot, update, args):
+    if not can_use(update):
+      return
     if len(args) == 1:
       username = args[0]
       chat_info = check_chat(bot, username)
@@ -245,13 +259,19 @@ def list_rss(bot, update, args):
                     parse_mode=ParseMode.HTML
                    )
 
-def get_new_entries(last, nentries):
+def get_new_entries(last, new_entries):
     entries = []
-    for k,v in enumerate(nentries):
-      if v.id == last:
-        return entries
+    for k,v in enumerate(new_entries):
+      if 'id' in v:
+        if v.id == last:
+            return entries
+        else:
+            entries.append(v)
       else:
-        entries.append(v)
+        if v.link == last:
+            return entries
+        else:
+            entries.append(v)
     return entries
 
 def manually_check_rss(bot, update):
@@ -314,7 +334,10 @@ def check_rss(bot, job):
         text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
       # ...und setze hier vor jeder Zeile 2 zusätzliche Leerzeichen
       if text != '':
-        newlast = newentr[0].id
+        if not 'id' in newentr[0]:
+            newlast = newentr[0].link
+        else:
+            newlast = newentr[0].id
         r.set('pythonbot:rss:' + url + ':last_entry', newlast)
         for k2, receiver in enumerate(list(r.smembers(v))):
           try:
