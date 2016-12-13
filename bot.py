@@ -295,63 +295,66 @@ def check_rss(bot, job):
       last = r.get('pythonbot:rss:' + url + ':last_entry')
 
       feed_data = feedparser.parse(url)
-      if not 'title' in feed_data.feed:
-        feed_title = feed_data.feed.link
-      else:
-        feed_title = feed_data.feed.title
-      newentr = get_new_entries(last, feed_data.entries)
-      text = ''
-      for k2, v2 in enumerate(newentr):
-        if not 'title' in v2:
-          title = 'Kein Titel'
-        else:
-          title = remove_tags(v2.title).lstrip()
-        if not 'link' in v2:
-          link = feed_data.feed.link
-          link_name = link
-        else:
-          link = v2.link
-          f = re.search('^https?://feedproxy\.google\.com/~r/(.+?)/.*', link) # feedproxy.google.com
-          if f:
-            link_name = f.group(1)
+      if feed_data.status < 400:
+          if not 'title' in feed_data.feed:
+            feed_title = feed_data.feed.link
           else:
-            link_name = urlparse(link).netloc
-        link_name = re.sub('^www\d?\.', '', link_name) # www.
-        if 'content' in v2:
-            content = remove_tags(v2.content[0].value).lstrip()
-            content = cleanRSS(content)
-            if len(content) > 250:
-              content = content[0:250] + '...'
-        elif 'summary' in v2:
-            content = remove_tags(v2.summary).lstrip()
-            content = cleanRSS(content)
-            if len(content) > 250:
-              content = content[0:250] + '...'
-        else:
-            content = ''
-        # Für 1 Nachricht pro Beitrag, tue dies:
-        # Entferne hier das "text + "...
-        text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
-      # ...und setze hier vor jeder Zeile 2 zusätzliche Leerzeichen
-      if text != '':
-        if not 'id' in newentr[0]:
-            newlast = newentr[0].link
-        else:
-            newlast = newentr[0].id
-        r.set('pythonbot:rss:' + url + ':last_entry', newlast)
-        for k2, receiver in enumerate(list(r.smembers(v))):
-          try:
-            bot.sendMessage(receiver, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
-          except Unauthorized:
-            print('Chat ' + receiver + ' existiert nicht mehr, lösche aus Abonnenten-Liste')
-            r.srem(v, receiver)
-            r.delete('pythonbot:rss:' + receiver)
-          except ChatMigrated as e:
-            print('Chat migriert: ' + receiver + ' -> ' + str(e.new_chat_id))
-            r.srem(v, receiver)
-            r.sadd(v, e.new_chat_id)
-            r.rename('pythonbot:rss:' + receiver, 'pythonbot:rss:' + str(e.new_chat_id))
-            bot.sendMessage(e.new_chat_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)            
+            feed_title = feed_data.feed.title
+          newentr = get_new_entries(last, feed_data.entries)
+          text = ''
+          for k2, v2 in enumerate(newentr):
+            if not 'title' in v2:
+              title = 'Kein Titel'
+            else:
+              title = remove_tags(v2.title).lstrip()
+            if not 'link' in v2:
+              link = feed_data.feed.link
+              link_name = link
+            else:
+              link = v2.link
+              f = re.search('^https?://feedproxy\.google\.com/~r/(.+?)/.*', link) # feedproxy.google.com
+              if f:
+                link_name = f.group(1)
+              else:
+                link_name = urlparse(link).netloc
+            link_name = re.sub('^www\d?\.', '', link_name) # www.
+            if 'content' in v2:
+                content = remove_tags(v2.content[0].value).lstrip()
+                content = cleanRSS(content)
+                if len(content) > 250:
+                  content = content[0:250] + '...'
+            elif 'summary' in v2:
+                content = remove_tags(v2.summary).lstrip()
+                content = cleanRSS(content)
+                if len(content) > 250:
+                  content = content[0:250] + '...'
+            else:
+                content = ''
+            # Für 1 Nachricht pro Beitrag, tue dies:
+            # Entferne hier das "text + "...
+            text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
+          # ...und setze hier vor jeder Zeile 2 zusätzliche Leerzeichen
+          if text != '':
+            if not 'id' in newentr[0]:
+                newlast = newentr[0].link
+            else:
+                newlast = newentr[0].id
+            r.set('pythonbot:rss:' + url + ':last_entry', newlast)
+            for k2, receiver in enumerate(list(r.smembers(v))):
+              try:
+                bot.sendMessage(receiver, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+              except Unauthorized:
+                print('Chat ' + receiver + ' existiert nicht mehr, lösche aus Abonnenten-Liste')
+                r.srem(v, receiver)
+                r.delete('pythonbot:rss:' + receiver)
+              except ChatMigrated as e:
+                print('Chat migriert: ' + receiver + ' -> ' + str(e.new_chat_id))
+                r.srem(v, receiver)
+                r.sadd(v, e.new_chat_id)
+                r.rename('pythonbot:rss:' + receiver, 'pythonbot:rss:' + str(e.new_chat_id))
+                bot.sendMessage(e.new_chat_id, text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
+      else:
+        print('HTTP-Fehler: ' + str(feed_data.status))
     print('----------')
 
 def error(bot, update, error):
