@@ -98,6 +98,8 @@ def cleanRSS(str):
     str = str.replace('Meldung bei www.tagesschau.de lesen', '')
     str = str.replace('The post.*appeared first on Sugoi! Anime Blog.', '')
     str = str.replace('Der Beitrag.*erschien zuerst auf MAnime.de.', '')
+    str = str.replace('<', '&lt;')
+    str = str.replace('>', '&gt;')
     str = re.sub('http://www\.serienjunkies.de/.*\.html', '', str)
     return str
 
@@ -354,7 +356,7 @@ def check_rss(bot, job):
                 # Für 1 Nachricht pro Beitrag, tue dies:
                 # Entferne hier das "text + "...
                 text = text + '\n<b>' + title + '</b>\n<i>' + feed_title + '</i>\n' + content + '\n<a href="' + link + '">Auf ' + link_name + ' weiterlesen</a>\n'
-            # ...und setze hier vor jeder Zeile 2 zusätzliche Leerzeichen
+            # ...und setze hier vor jeder Zeile 4 zusätzliche Leerzeichen
             if text != '':
                 if not 'id' in newentr[0]:
                     newlast = newentr[0].link
