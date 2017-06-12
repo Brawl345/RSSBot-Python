@@ -10,4 +10,4 @@ RSS-Bot für Telegram
 6. `bot.py` öffnen und unter `def can_use(update):` die ID zur eigenen abändern
 7. `python3 bot.py`
 
-(c) 2016 Andreas Bielawski
+(c) 2016-2017 Andreas Bielawski
