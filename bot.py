@@ -414,11 +414,10 @@ def main():
     dp.add_error_handler(error)
 
     # cron
-    job_minute = Job(check_rss, 60.0)
-    j.put(job_minute, next_t=10.0)
+    j.run_repeating(check_rss, interval=60.0, first=15.0)
 
     # Start the Bot
-    updater.start_polling(timeout=20, clean=True)
+    updater.start_polling(timeout=20, clean=True, bootstrap_retries=-1, allowed_updates=["message"])
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
