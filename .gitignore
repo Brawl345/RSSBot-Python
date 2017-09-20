@@ -1,7 +1,11 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files / pip
 __pycache__/
 *.py[cod]
 *$py.class
+src/
 
-# Config
+# IDE
+.idea/
+
+# Bot-specific files
 config.ini

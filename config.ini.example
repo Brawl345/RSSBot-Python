@@ -8,4 +8,5 @@ token = 1337:1234567890abcdefgh
 #socket_path = /home/user/.redis/sock
 
 [ADMIN]
+# Must be integers!
 id = [1337]
