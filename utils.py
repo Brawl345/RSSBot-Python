@@ -41,6 +41,7 @@ def clean_rss(content):
     """Cleans content"""
     content = content.replace('[…]', '')
     content = content.replace('[bilder]', '')
+    content = content.replace('[boerse]', '')
     content = content.replace('[mehr]', '')
     content = content.replace('[video]', '')
     content = content.replace('...[more]', '')
@@ -48,6 +49,7 @@ def clean_rss(content):
     content = content.replace('[liveticker]', '')
     content = content.replace('[livestream]', '')
     content = content.replace('[multimedia]', '')
+    content = content.replace('[sportschau]', '')
     content = content.replace('[phoenix]', '')
     content = content.replace('[swr]', '')
     content = content.replace('[ndr]', '')
@@ -59,6 +61,7 @@ def clean_rss(content):
     content = content.replace('Click for full.', '')
     content = content.replace('Read more »', '')
     content = content.replace('Read more', '')
+    content = content.replace('...Read More', '')
     content = content.replace('(more…)', '')
     content = content.replace('View On WordPress', '')
     content = content.replace('Continue reading →', '')
@@ -67,8 +70,8 @@ def clean_rss(content):
     content = content.replace('Meldung bei www.tagesschau.de lesen', '')
     content = content.replace('<', '&lt;')
     content = content.replace('>', '&gt;')
-    content = re.sub('Der Beitrag.*erschien zuerst auf MAnime.de.', '', content)
-    content = re.sub('The post.*appeared first on Sugoi! Anime Blog.', '', content)
+    content = re.sub('Der Beitrag.*erschien zuerst auf .+\.', '', content)
+    content = re.sub('The post.*appeared first on .+\.', '', content)
     content = re.sub('http://www\.serienjunkies.de/.*\.html', '', content)
     return content
 
