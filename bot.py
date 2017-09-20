@@ -4,6 +4,7 @@
 # RSS Bot
 # Python 3 required
 
+import html
 import logging
 import re
 from configparser import ConfigParser
@@ -330,7 +331,7 @@ def check_rss(bot, job):
                     if not 'title' in v2:
                         title = 'Kein Titel'
                     else:
-                        title = remove_tags(v2.title).lstrip()
+                        title = html.escape(remove_tags(v2.title).lstrip())
                     if not 'link' in v2:
                         link = feed_data.feed.link
                         link_name = link
