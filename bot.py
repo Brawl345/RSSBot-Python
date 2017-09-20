@@ -139,7 +139,7 @@ def subscribe(bot, update, args):
         update.message.reply_text('❌ Keine Feed-URL angegeben.')
         return
     feed_url = args[0]
-    if not re.match("^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$", feed_url):
+    if not re.match("^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&~+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$", feed_url):
         update.message.reply_text('❌ Das ist keine URL.')
         return
 

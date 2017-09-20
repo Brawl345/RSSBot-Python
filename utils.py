@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import html
 import re
 
 from bot import admins
@@ -30,10 +31,10 @@ def get_new_entries(entries, last_entry):
     return new_entries
 
 
-def remove_html_tags(html):
+def remove_html_tags(rawhtml):
     """Removes HTML tags"""
     cleanr = re.compile('<.*?>')
-    cleantext = re.sub(cleanr, '', html)
+    cleantext = re.sub(cleanr, '', rawhtml)
     return cleantext
 
 
@@ -78,7 +79,7 @@ def clean_rss(content):
 
 def get_content(content):
     """Sanitizes content and cuts it to 250 chars"""
-    content = clean_rss(remove_html_tags(content).strip())
+    content = clean_rss(remove_html_tags(html.unescape(content)).strip())
     if len(content) > 250:
         content = content[0:250] + '...'
     return content
