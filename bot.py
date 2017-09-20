@@ -242,7 +242,7 @@ def unsubscribe(bot, update, args):
 
 @run_async
 def check_feed(bot, key):
-    feed_url = re.match('^pythonbot:rss:(.+):subs$', key).group(1)
+    feed_url = re.match('^' + feed_hash.format('(.+):subs$'), key).group(1)
     logger.info(feed_url)
     data = feedparser.parse(feed_url)
     if 'link' not in data.feed:
@@ -329,7 +329,7 @@ def check_feed(bot, key):
 @run_async
 def run_job(bot, job=None):
     logger.info('================================')
-    keys = r.keys('pythonbot:rss:*:subs')
+    keys = r.keys(feed_hash.format('*:subs'))
     for key in keys:
         check_feed(bot, key)
 
