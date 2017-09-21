@@ -259,7 +259,8 @@ def check_feed(bot, key):
         if 'title' not in entry:
             post_title = 'Kein Titel'
         else:
-            post_title = html.escape(utils.remove_html_tags(entry['title']).strip())
+            post_title = utils.remove_html_tags(entry['title']).strip()
+            post_title = post_title.replace('<', '&lt;').replace('>', '&gt;')
         if 'link' not in entry:
             post_link = entry.link
             link_name = post_link
