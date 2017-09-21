@@ -262,7 +262,7 @@ def check_feed(bot, key):
             post_title = utils.remove_html_tags(entry['title']).strip()
             post_title = post_title.replace('<', '&lt;').replace('>', '&gt;')
         if 'link' not in entry:
-            post_link = entry.link
+            post_link = data.link
             link_name = post_link
         else:
             post_link = entry.link
