@@ -246,7 +246,7 @@ def check_feed(bot, key):
     logger.info(feed_url)
     data = feedparser.parse(feed_url)
     if 'link' not in data.feed:
-        logger.warning('Kein gültiger Feed, Status-Code ' + str(data.status))
+        logger.warning('Kein gültiger Feed, Status-Code ' + str(data["status"]))
         return None
     if 'title' not in data.feed:
         feed_title = data.feed['link']
