@@ -69,7 +69,7 @@ else:
     r = redis.Redis(host=redis_host, port=int(redis_port), db=int(redis_db), decode_responses=True)
 
 if not r.ping():
-    logging.getLogger("Redis").critical("Redis-Verbindungsfehler, config.ini prüfen")
+    logger.getLogger("Redis").critical("Redis-Verbindungsfehler, config.ini prüfen")
     sys.exit(1)
 
 feed_hash = 'pythonbot:rss:{0}'
@@ -296,12 +296,12 @@ def check_feed(bot, key):
                     disable_web_page_preview=True
                 )
             except telegram.error.Unauthorized:
-                logging.warning('Chat ' + member + ' existiert nicht mehr, wird gelöscht.')
+                logger.warning('Chat ' + member + ' existiert nicht mehr, wird gelöscht.')
                 r.srem(key, member)
                 r.delete(feed_hash.format(member))
             except telegram.error.ChatMigrated as new_chat:
                 new_chat_id = new_chat.new_chat_id
-                logging.info('Chat migriert: ' + member + ' -> ' + str(new_chat_id))
+                logger.info('Chat migriert: ' + member + ' -> ' + str(new_chat_id))
                 r.srem(key, member)
                 r.sadd(key, new_chat_id)
                 r.rename(feed_hash.format(member), feed_hash.format(new_chat_id))
