@@ -313,6 +313,8 @@ def check_feed(bot, key):
                 )
             except telegram.error.TimedOut:
                 pass
+            except telegram.error.BadRequest as exception:
+                logger.error(exception)
 
     if not r.exists(key):
         r.delete(last_entry_hash)
