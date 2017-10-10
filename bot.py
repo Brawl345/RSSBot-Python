@@ -69,7 +69,7 @@ else:
     r = redis.Redis(host=redis_host, port=int(redis_port), db=int(redis_db), decode_responses=True)
 
 if not r.ping():
-    logger.getLogger("Redis").critical("Redis-Verbindungsfehler, config.ini prüfen")
+    logging.getLogger("Redis").critical("Redis-Verbindungsfehler, config.ini prüfen")
     sys.exit(1)
 
 feed_hash = 'pythonbot:rss:{0}'
