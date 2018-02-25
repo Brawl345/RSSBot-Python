@@ -340,6 +340,10 @@ def run_job(bot, job=None):
         check_feed(bot, key)
 
 
+def onerror(bot, update, error):
+    logger.error(error)
+
+
 # Main function
 def main():
     # Setup the updater and show bot info
@@ -363,6 +367,12 @@ def main():
     ]
     for handler in handlers:
         updater.dispatcher.add_handler(handler)
+
+    # Hide "Error while getting Updates" because it's not our fault
+    updater.logger.addFilter((lambda log: not log.msg.startswith('Error while getting Updates:')))
+
+    # Fix for Python <= 3.5
+    updater.dispatcher.add_error_handler(onerror)
 
     updater.job_queue.run_repeating(
         run_job,
