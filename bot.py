@@ -16,21 +16,30 @@ from telegram.ext.dispatcher import run_async
 
 import utils
 
-# Logging
-logging.basicConfig(
-    format="%(asctime)s - %(levelname)s: %(message)s",
-    datefmt="%d.%m.%Y %H:%M:%S",
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
-
-# Bot configuration
 config = ConfigParser()
 try:
     config.read_file(open('config.ini'))
 except FileNotFoundError:
-    logger.critical('Config.ini nicht gefunden')
+    logging.critical('Config.ini nicht gefunden')
     sys.exit(1)
+
+# Logging
+try:
+    logging_conf = config["LOGGING"]
+    logging_level = logging_conf.get("level", "INFO")
+    logging_format = logging_conf.get("format", "%(asctime)s - %(levelname)s: %(message)s", raw=True)
+    if logging_level not in ["DEBUG", "INFO", "CRITICAL", "ERROR", "WARNING"]:
+        logging.warning("Logging Level invalid. Will be changed to WARNING")
+        logging.basicConfig(format=logging_format, level=logging.INFO, datefmt="%d.%m.%Y %H:%M:%S")
+    else:
+        logging.basicConfig(format=logging_format,
+                            level=eval("logging.{0}".format(logging_level.upper())),
+                            datefmt="%d.%m.%Y %H:%M:%S")
+except KeyError:
+    logging.basicConfig(format="%(asctime)s - %(levelname)s: %(message)s",
+                        level=logging.INFO,
+                        datefmt="%d.%m.%Y %H:%M:%S")
+logger = logging.getLogger(__name__)
 
 # Bot token
 try:
