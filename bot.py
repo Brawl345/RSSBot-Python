@@ -256,9 +256,9 @@ def check_feed(bot, key):
     data = feedparser.parse(feed_url)
     if 'link' not in data.feed:
         if 'status' in data and data["status"] != 200:
-            logger.warning('Kein gültiger Feed, HTTP-Status-Code ' + str(data["status"]))
+            logger.warning(feed_url + ' - Kein gültiger Feed, HTTP-Status-Code ' + str(data["status"]))
         else:
-            logger.warning('Kein gültiger Feed: ' + str(data.bozo_exception))
+            logger.warning(feed_url + ' - Kein gültiger Feed: ' + str(data.bozo_exception))
         return None
     if 'title' not in data.feed:
         feed_title = data.feed['link']
