@@ -21,7 +21,7 @@ config = ConfigParser()
 try:
     config.read_file(open("config.ini"))
 except FileNotFoundError:
-    logging.critical("Config.ini nicht gefunden")
+    logging.critical("config.ini not found")
     sys.exit(1)
 
 # Logging
@@ -46,25 +46,25 @@ logger = logging.getLogger(__name__)
 try:
     bot_token = config["DEFAULT"]["token"]
 except KeyError:
-    logger.error("Kein Bot-Token gesetzt, bitte config.ini prüfen")
+    logger.error("Bot token is missing, check config.ini")
     sys.exit(1)
 if not bot_token:
-    logger.error("Kein Bot-Token gesetzt, bitte config.ini prüfen")
+    logger.error("Bot token is missing, check config.ini")
     sys.exit(1)
 
 # Admins
 try:
     admins = loads(config["ADMIN"]["id"])
 except KeyError:
-    logger.error("Keine Admin-IDs gesetzt, bitte config.ini prüfen.")
+    logger.error("No admin IDs are set, check config.ini.")
     sys.exit(1)
 if not admins:
-    logger.error("Keine Admin-IDs gesetzt, bitte config.ini prüfen.")
+    logger.error("No admin IDs are set, check config.ini.")
     sys.exit(1)
 
 for admin in admins:
     if not isinstance(admin, int):
-        logger.error("Admin-IDs müssen Integer sein.")
+        logger.error("Admin IDs need to be integers.")
         sys.exit(1)
 
 # Redis
@@ -79,7 +79,7 @@ else:
     r = redis.Redis(host=redis_host, port=int(redis_port), db=int(redis_db), decode_responses=True)
 
 if not r.ping():
-    logging.getLogger("Redis").critical("Redis-Verbindungsfehler, config.ini prüfen")
+    logging.getLogger("Redis").critical("Failed to connect to Redis server")
     sys.exit(1)
 
 feed_hash = "pythonbot:rss:{0}"
@@ -90,7 +90,7 @@ def start(bot, update):
     if not utils.can_use_bot(update):
         return
     update.message.reply_text(
-        text="<b>Willkommen beim RSS-Bot!</b>\nSende /help, um zu starten.",
+        text="<b>Welcome to the RSS Bot!</b>\nSend /help to get started.",
         parse_mode=telegram.ParseMode.HTML
     )
 
@@ -100,9 +100,9 @@ def help_text(bot, update):
     if not utils.can_use_bot(update):
         return
     update.message.reply_text(
-        text="<b>/rss</b> <i>[Chat]</i>: Abonnierte Feeds anzeigen\n"
-             "<b>/sub</b> <i>Feed-URL</i> <i>[Chat]</i>: Feed abonnieren\n"
-             "<b>/del</b> <i>n</i> <i>[Chat]</i>: Feed löschen",
+        text="<b>/rss</b> <i>[Chat]</i>: Show subbed feeds\n"
+             "<b>/sub</b> <i>Feed URL</i> <i>[Chat]</i>: Sub to feed (Chat is optional)\n"
+             "<b>/del</b> <i>n</i> <i>[Chat]</i>: Unsubscribe feed (Chat is optional)",
         parse_mode=telegram.ParseMode.HTML
     )
 
@@ -116,7 +116,7 @@ def list_feeds(bot, update, args):
         try:
             resp = bot.getChat(chat_name)
         except telegram.error.BadRequest:
-            update.message.reply_text("❌ Dieser Kanal existiert nicht.")
+            update.message.reply_text("❌ This channel does not exist.")
             return
         chat_id = str(resp.id)
         chat_title = resp.title
@@ -129,9 +129,9 @@ def list_feeds(bot, update, args):
 
     subs = r.smembers(feed_hash.format(chat_id))
     if not subs:
-        text = "❌ Keine Feeds abonniert."
+        text = "❌ There are no feeds."
     else:
-        text = "<b>" + html.escape(chat_title) + "</b> hat abonniert:\n"
+        text = "<b>" + html.escape(chat_title) + "</b> is subscribed to:\n"
         for n, feed in enumerate(subs):
             text += "<b>" + str(n + 1) + ")</b> " + feed + "\n"
 
@@ -146,11 +146,11 @@ def subscribe(bot, update, args):
     if not utils.can_use_bot(update):
         return
     if not args:
-        update.message.reply_text("❌ Keine Feed-URL angegeben.")
+        update.message.reply_text("❌ No feed URL given.")
         return
     feed_url = args[0]
     if not re.match("^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&~+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$", feed_url):
-        update.message.reply_text("❌ Das ist keine URL.")
+        update.message.reply_text("❌ That doesn't look like an URL.")
         return
 
     # Get Chat ID from name if given
@@ -159,12 +159,12 @@ def subscribe(bot, update, args):
         try:
             resp = bot.getChat(chat_name)
         except telegram.error.BadRequest:
-            update.message.reply_text("❌ Dieser Kanal existiert nicht.")
+            update.message.reply_text("❌ This channel does not exist.")
             return
         chat_id = str(resp.id)
         resp = bot.getChatMember(chat_id, bot.id)
         if resp.status != "administrator":
-            update.message.reply_text("❌ Bot ist kein Administrator in diesem Kanal.")
+            update.message.reply_text("❌ You need to add the bot as an administrator to the channel.")
             return
     else:
         chat_id = str(update.message.chat.id)
@@ -172,11 +172,11 @@ def subscribe(bot, update, args):
     bot.sendChatAction(update.message.chat.id, action=telegram.ChatAction.TYPING)
     data = feedparser.parse(feed_url)
     if "link" not in data.feed:
-        update.message.reply_text("❌ Kein gültiger Feed.")
+        update.message.reply_text("❌ Not a valid feed.")
         return
     feed_url = data.href  # Follow all redirects
     if r.sismember(feed_hash.format(chat_id), feed_url):
-        update.message.reply_text("✅ Dieser Feed wurde bereits abonniert.")
+        update.message.reply_text("✅ Already subscribed to this feed.")
         return
 
     if "title" not in data.feed:
@@ -197,7 +197,7 @@ def subscribe(bot, update, args):
     r.sadd(feed_hash.format(feed_url + ":subs"), chat_id)
     r.sadd(feed_hash.format(chat_id), feed_url)
     update.message.reply_text(
-        text="✅ <b>" + feed_title + "</b> hinzugefügt!",
+        text="✅ <b>" + feed_title + "</b> added!",
         parse_mode=telegram.ParseMode.HTML
     )
 
@@ -207,7 +207,7 @@ def unsubscribe(bot, update, args):
     if not utils.can_use_bot(update):
         return
     if not args:
-        update.message.reply_text("❌ Keine Nummer angegeben.")
+        update.message.reply_text("❌ No number given, check /rss first.")
         return
 
     # Get Chat ID from name if given
@@ -216,7 +216,7 @@ def unsubscribe(bot, update, args):
         try:
             resp = bot.getChat(chat_name)
         except telegram.error.BadRequest:
-            update.message.reply_text("❌ Dieser Kanal existiert nicht.")
+            update.message.reply_text("❌ This channel does not exist.")
             return
         chat_id = str(resp.id)
     else:
@@ -225,16 +225,16 @@ def unsubscribe(bot, update, args):
     try:
         n = int(args[0])
     except ValueError:
-        update.message.reply_text("❌ Keine Nummer angegeben.")
+        update.message.reply_text("❌ No number given.".")
         return
 
     chat_hash = feed_hash.format(chat_id)
     subs = r.smembers(chat_hash)
     if n < 1:
-        update.message.reply_text("❌ Nummer muss größer als 0 sein!")
+        update.message.reply_text("❌ Number must be bigger than 0!")
         return
     elif n > len(subs):
-        update.message.reply_text("❌ Feed-ID zu hoch.")
+        update.message.reply_text("❌ Feed ID too high.")
         return
 
     feed_url = list(subs)[n - 1]
@@ -245,7 +245,7 @@ def unsubscribe(bot, update, args):
         r.delete(feed_hash.format(feed_url + ":last_entry"))
 
     update.message.reply_text(
-        text="✅ <b>" + feed_url + "</b> entfernt.",
+        text="✅ <b>" + feed_url + "</b> removed.",
         parse_mode=telegram.ParseMode.HTML
     )
 
@@ -257,9 +257,9 @@ def check_feed(bot, key):
     data = feedparser.parse(feed_url)
     if "link" not in data.feed:
         if "status" in data and data["status"] != 200:
-            logger.warning(feed_url + " - Kein gültiger Feed, HTTP-Status-Code " + str(data["status"]))
+            logger.warning(feed_url + " - Not a valid feed, got HTTP code " + str(data["status"]))
         else:
-            logger.warning(feed_url + " - Kein gültiger Feed: " + str(data.bozo_exception))
+            logger.warning(feed_url + " - Not a valid feed: " + str(data.bozo_exception))
         return None
     if "title" not in data.feed:
         feed_title = data.feed["link"]
@@ -270,7 +270,7 @@ def check_feed(bot, key):
     new_entries = utils.get_new_entries(data.entries, last_entry)
     for entry in reversed(new_entries):
         if "title" not in entry:
-            post_title = "Kein Titel"
+            post_title = "No title"
         else:
             post_title = utils.remove_html_tags(entry["title"]).strip()
             post_title = post_title.replace("<", "&lt;").replace(">", "&gt;")
@@ -296,7 +296,7 @@ def check_feed(bot, key):
             feed_title=feed_title,
             content=content
         )
-        text += "\n<a href=\"{post_link}\">Auf {link_name} weiterlesen</a>\n".format(
+        text += "\n<a href=\"{post_link}\">Read more on {link_name}</a>\n".format(
             post_link=post_link,
             link_name=link_name
         )
@@ -309,12 +309,12 @@ def check_feed(bot, key):
                     disable_web_page_preview=True
                 )
             except telegram.error.Unauthorized:
-                logger.warning("Chat " + member + " existiert nicht mehr, wird gelöscht.")
+                logger.warning("Chat " + member + " doesn't exist anymore, will be deleted.")
                 r.srem(key, member)
                 r.delete(feed_hash.format(member))
             except telegram.error.ChatMigrated as new_chat:
                 new_chat_id = new_chat.new_chat_id
-                logger.info("Chat migriert: " + member + " -> " + str(new_chat_id))
+                logger.info("Chat migrated: " + member + " -> " + str(new_chat_id))
                 r.srem(key, member)
                 r.sadd(key, new_chat_id)
                 r.rename(feed_hash.format(member), feed_hash.format(new_chat_id))
@@ -359,9 +359,9 @@ def main():
     # Setup the updater and show bot info
     updater = Updater(token=bot_token)
     try:
-        logger.info("Starte {0}, AKA @{1} ({2})".format(updater.bot.first_name, updater.bot.username, updater.bot.id))
+        logger.info("Starting {0}, AKA @{1} ({2})".format(updater.bot.first_name, updater.bot.username, updater.bot.id))
     except Unauthorized:
-        logger.critical("Anmeldung nicht möglich, Bot-Token falsch?")
+        logger.critical("Logging in failed, check bot token")
         sys.exit(1)
 
     # Register Handlers

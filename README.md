@@ -1,12 +1,12 @@
-RSS-Bot für Telegram
+RSS bot for Telegram
 =====================
-1. **Klonen:** `git clone https://git.centzilius.de/iCON/rssbot`
-2. **Python 3 installieren:** `sudo apt-get install python3 python3-pip`
-3. **Module installieren:** `sudo pip3 install -r requirements.txt`
-4. **Config kopieren:** `cp config.ini.example config.ini`
-5. **Bot-Token** in `config.ini` einfügen
-   1. Weitere Einstellungen für Redis vornehmen, falls vom Standard abweicht
-6. **Eigene Admin-ID in die Config eintragen**
+1. **Clone:** `git clone https://github.com/Brawl345/rssbot`
+2. **Install Python 3 and Redis**
+3. **Install modules:** `(sudo) pip3 install -r requirements.txt`
+4. **Copy config:** `cp config.ini.example config.ini`
+5. **Insert bot token** in `config.ini`
+   1. Adjust redis settings if needed
+6. **Insert your Telegram ID as admin** (send `@Brawlbot id` inside a chat to get yours)
 7. `python3 bot.py`
 
-(c) 2016-2017 Andreas Bielawski
+(c) 2016-2019 Andreas Bielawski
