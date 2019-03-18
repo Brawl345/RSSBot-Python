@@ -46,10 +46,10 @@ logger = logging.getLogger(__name__)
 try:
     bot_token = config["DEFAULT"]["token"]
 except KeyError:
-    logger.error("Bot token is missing, check config.ini")
+    logger.error("Bot token is missing, check config.ini.")
     sys.exit(1)
 if not bot_token:
-    logger.error("Bot token is missing, check config.ini")
+    logger.error("Bot token is missing, check config.ini.")
     sys.exit(1)
 
 # Admins
@@ -79,14 +79,14 @@ else:
     r = redis.Redis(host=redis_host, port=int(redis_port), db=int(redis_db), decode_responses=True)
 
 if not r.ping():
-    logging.getLogger("Redis").critical("Failed to connect to Redis server")
+    logging.getLogger("Redis").critical("Failed to connect to Redis server.")
     sys.exit(1)
 
 feed_hash = "pythonbot:rss:{0}"
 
 
 @run_async
-def start(bot, update):
+def start(update, context):
     if not utils.can_use_bot(update):
         return
     update.message.reply_text(
@@ -96,7 +96,7 @@ def start(bot, update):
 
 
 @run_async
-def help_text(bot, update):
+def help_text(update, context):
     if not utils.can_use_bot(update):
         return
     update.message.reply_text(
@@ -108,13 +108,13 @@ def help_text(bot, update):
 
 
 @run_async
-def list_feeds(bot, update, args):
+def list_feeds(update, context):
     if not utils.can_use_bot(update):
         return
-    if args:
-        chat_name = args[0]
+    if context.args:
+        chat_name = context.args[0]
         try:
-            resp = bot.getChat(chat_name)
+            resp = context.bot.getChat(chat_name)
         except telegram.error.BadRequest:
             update.message.reply_text("❌ This channel does not exist.")
             return
@@ -142,34 +142,34 @@ def list_feeds(bot, update, args):
 
 
 @run_async
-def subscribe(bot, update, args):
+def subscribe(update, context):
     if not utils.can_use_bot(update):
         return
-    if not args:
+    if not context.args:
         update.message.reply_text("❌ No feed URL given.")
         return
-    feed_url = args[0]
+    feed_url = context.args[0]
     if not re.match("^http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&~+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$", feed_url):
         update.message.reply_text("❌ That doesn't look like an URL.")
         return
 
     # Get Chat ID from name if given
-    if len(args) > 1:
-        chat_name = args[1]
+    if len(context.args) > 1:
+        chat_name = context.args[1]
         try:
-            resp = bot.getChat(chat_name)
+            resp = context.bot.getChat(chat_name)
         except telegram.error.BadRequest:
             update.message.reply_text("❌ This channel does not exist.")
             return
         chat_id = str(resp.id)
-        resp = bot.getChatMember(chat_id, bot.id)
+        resp = context.bot.getChatMember(chat_id, context.bot.id)
         if resp.status != "administrator":
             update.message.reply_text("❌ You need to add the bot as an administrator to the channel.")
             return
     else:
         chat_id = str(update.message.chat.id)
 
-    bot.sendChatAction(update.message.chat.id, action=telegram.ChatAction.TYPING)
+    context.bot.sendChatAction(update.message.chat.id, action=telegram.ChatAction.TYPING)
     data = feedparser.parse(feed_url)
     if "link" not in data.feed:
         update.message.reply_text("❌ Not a valid feed.")
@@ -203,18 +203,18 @@ def subscribe(bot, update, args):
 
 
 @run_async
-def unsubscribe(bot, update, args):
+def unsubscribe(update, context):
     if not utils.can_use_bot(update):
         return
-    if not args:
+    if not context.args:
         update.message.reply_text("❌ No number given, check /rss first.")
         return
 
     # Get Chat ID from name if given
-    if len(args) > 1:
-        chat_name = args[1]
+    if len(context.args) > 1:
+        chat_name = context.args[1]
         try:
-            resp = bot.getChat(chat_name)
+            resp = context.bot.getChat(chat_name)
         except telegram.error.BadRequest:
             update.message.reply_text("❌ This channel does not exist.")
             return
@@ -223,9 +223,9 @@ def unsubscribe(bot, update, args):
         chat_id = str(update.message.chat.id)
 
     try:
-        n = int(args[0])
+        n = int(context.args[0])
     except ValueError:
-        update.message.reply_text("❌ No number given.".")
+        update.message.reply_text("❌ No number given.")
         return
 
     chat_hash = feed_hash.format(chat_id)
@@ -343,25 +343,29 @@ def check_feed(bot, key):
 
 
 @run_async
-def run_job(bot, job=None):
+def run_job(context):
     logger.info("================================")
     keys = r.keys(feed_hash.format("*:subs"))
     for key in keys:
-        check_feed(bot, key)
+        check_feed(context.bot, key)
 
 
-def onerror(bot, update, error):
-    logger.error(error)
+def run_job_manually(update, context):
+    run_job(context)
+
+
+def onerror(update, context):
+    logger.error("Update \"%s\" caused error \"%s\"", update, context.error)
 
 
 # Main function
 def main():
     # Setup the updater and show bot info
-    updater = Updater(token=bot_token)
+    updater = Updater(token=bot_token, use_context=True)
     try:
         logger.info("Starting {0}, AKA @{1} ({2})".format(updater.bot.first_name, updater.bot.username, updater.bot.id))
     except Unauthorized:
-        logger.critical("Logging in failed, check bot token")
+        logger.critical("Logging in failed, check bot token.")
         sys.exit(1)
 
     # Register Handlers
@@ -371,7 +375,7 @@ def main():
         CommandHandler("rss", list_feeds, pass_args=True),
         CommandHandler("sub", subscribe, pass_args=True),
         CommandHandler("del", unsubscribe, pass_args=True),
-        CommandHandler("sync", run_job)
+        CommandHandler("sync", run_job_manually)
     ]
     for handler in handlers:
         updater.dispatcher.add_handler(handler)
