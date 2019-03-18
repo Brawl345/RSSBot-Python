@@ -1,5 +1,6 @@
 [DEFAULT]
 token = 1337:1234567890abcdefgh
+lang = en
 
 [LOGGING]
 # Valid options are ERROR, INFO, DEBUG, CRITICAL, WARNING

@@ -1,0 +1,140 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-03-18 20:31+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=cp1252\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: bot.py:45
+msgid "Logging Level invalid. Will be changed to INFO"
+msgstr ""
+
+#: bot.py:61 bot.py:64
+msgid "Bot token is missing, check config.ini."
+msgstr ""
+
+#: bot.py:71 bot.py:74
+msgid "No admin IDs are set, check config.ini."
+msgstr ""
+
+#: bot.py:79
+msgid "Admin IDs need to be integers."
+msgstr ""
+
+#: bot.py:94
+msgid "Failed to connect to Redis server."
+msgstr ""
+
+#: bot.py:105
+msgid ""
+"<b>Welcome to the RSS Bot!</b>\n"
+"Send /help to get started."
+msgstr ""
+
+#: bot.py:115
+msgid ""
+"<b>/rss</b> <i>[Chat]</i>: Show subbed feeds\n"
+"<b>/sub</b> <i>Feed URL</i> <i>[Chat]</i>: Sub to feed\n"
+"<b>/del</b> <i>n</i> <i>[Chat]</i>: Unsubscribe feed\n"
+"<i>[Chat]</i> is an optional argument with the @Channelname."
+msgstr ""
+
+#: bot.py:132 bot.py:175 bot.py:232
+msgid "This channel does not exist."
+msgstr ""
+
+#: bot.py:145
+msgid "There are no feeds."
+msgstr ""
+
+#: bot.py:147
+msgid ""
+"<b>{0}</b> is subscribed to:\n"
+msgstr ""
+
+#: bot.py:162
+msgid "No feed URL given."
+msgstr ""
+
+#: bot.py:166
+msgid "That doesn't look like an URL."
+msgstr ""
+
+#: bot.py:180
+msgid "You need to add the bot as an administrator to the channel."
+msgstr ""
+
+#: bot.py:188
+msgid "Not a valid feed."
+msgstr ""
+
+#: bot.py:192
+msgid "Already subscribed to this feed."
+msgstr ""
+
+#: bot.py:213
+msgid "<b>{0}</b> added!"
+msgstr ""
+
+#: bot.py:223 bot.py:241
+msgid "No number given."
+msgstr ""
+
+#: bot.py:247
+msgid "Number must be bigger than 0!"
+msgstr ""
+
+#: bot.py:250
+msgid "Feed ID too high."
+msgstr ""
+
+#: bot.py:261
+msgid "<b>{0}</b> removed!"
+msgstr ""
+
+#: bot.py:273
+msgid "{0} - Not a valid feed, got HTTP Code {1}"
+msgstr ""
+
+#: bot.py:275
+msgid "{0} - Not a valid feed: {1}"
+msgstr ""
+
+#: bot.py:286
+msgid "No title"
+msgstr ""
+
+#: bot.py:312
+msgid "Read more on {0}"
+msgstr ""
+
+#: bot.py:326
+msgid "Chat {0} doesn't exist anymore, will be deleted."
+msgstr ""
+
+#: bot.py:331
+msgid "Chat migrated: "
+msgstr ""
+
+#: bot.py:372
+msgid "Update \"%s\" caused error \"%s\""
+msgstr ""
+
+#: bot.py:380
+msgid "Starting {0}, AKA @{1} ({2})"
+msgstr ""
+
+#: bot.py:382
+msgid "Logging in failed, check bot token."
+msgstr ""
+
